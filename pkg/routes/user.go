@@ -10,7 +10,7 @@ import (
 func UserRoutes(router *gin.RouterGroup, service *services.UserService) {
 	userGroup := router.Group("/user")
 	{
-		userGroup.GET("/signup", service.CreateUser)
+		userGroup.POST("/signup", service.CreateUser)
 	}
 	router.GET("/user", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"Hello": "Test"})

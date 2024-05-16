@@ -22,7 +22,17 @@ func NewUserService(db *gorm.DB) *UserService {
 func (service *UserService) CreateUser(c *gin.Context) {
 	var user models.User
 
-	c.BindJSON(&user)
+	err := c.ShouldBindJSON(&user)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	result := service.db.Create(&user)
+	if result.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": result.Error.Error()})
+		return
+	}
 
 	c.JSON(http.StatusCreated, user)
 	fmt.Println("Create User")
