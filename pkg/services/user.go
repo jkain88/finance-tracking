@@ -13,6 +13,11 @@ type UserService struct {
 	db *gorm.DB
 }
 
+type SignInInput struct {
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
 func NewUserService(db *gorm.DB) *UserService {
 	return &UserService{
 		db: db,
@@ -36,4 +41,15 @@ func (service *UserService) CreateUser(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, user)
 	fmt.Println("Create User")
+}
+
+func (service *UserService) SignIn(c *gin.Context) {
+	var input SignInInput
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"test": "foo"})
 }
