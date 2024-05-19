@@ -3,6 +3,7 @@ package services
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jkain88/finance-tracking/pkg/models"
@@ -17,6 +18,14 @@ type UserService struct {
 type SignInInput struct {
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
+}
+
+type UserProfile struct {
+	ID        uint      `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	FirstName string    `json:"first_name"`
+	LastName  string    `json:"last_name"`
+	Email     string    `json:"email"`
 }
 
 func NewUserService(db *gorm.DB) *UserService {
@@ -79,4 +88,24 @@ func (service *UserService) SignIn(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"token": token})
+}
+
+func (service *UserService) Me(c *gin.Context) {
+	userId := c.GetUint("userId")
+
+	var user models.User
+	result := service.db.Find(&user, userId)
+	if result.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": result.Error.Error()})
+		return
+	}
+
+	userProfile := UserProfile{
+		ID:        user.ID,
+		CreatedAt: user.CreatedAt,
+		Email:     user.Email,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+	}
+	c.JSON(http.StatusOK, userProfile)
 }
