@@ -123,3 +123,16 @@ func (service *UserService) Me(c *gin.Context) {
 
 	c.JSON(http.StatusOK, userProfile)
 }
+
+func (service *UserService) UserCategories(c *gin.Context) {
+	var categories []models.Category
+	userId := c.GetUint("userId")
+
+	result := service.db.Where("user_id = ?", userId).Find(&categories)
+	if result.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": result.Error.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, categories)
+}

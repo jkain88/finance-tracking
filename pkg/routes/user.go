@@ -18,6 +18,7 @@ func UserRoutes(router *gin.RouterGroup, service *services.UserService) {
 		authenticated.Use(middlewares.Authenticate)
 		{
 			authenticated.GET("me", service.Me)
+			authenticated.GET("categories", service.UserCategories)
 		}
 	}
 	router.GET("/user", func(c *gin.Context) {
