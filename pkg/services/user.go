@@ -28,6 +28,11 @@ type UserProfile struct {
 	Email     string    `json:"email"`
 }
 
+type UserCategory struct {
+	ID   uint   `json:"id"`
+	Name string `json:"name"`
+}
+
 func NewUserService(db *gorm.DB) *UserService {
 	return &UserService{
 		db: db,
@@ -126,6 +131,7 @@ func (service *UserService) Me(c *gin.Context) {
 
 func (service *UserService) UserCategories(c *gin.Context) {
 	var categories []models.Category
+	var userCategories []UserCategory
 	userId := c.GetUint("userId")
 
 	result := service.db.Where("user_id = ?", userId).Find(&categories)
@@ -134,5 +140,12 @@ func (service *UserService) UserCategories(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, categories)
+	for _, category := range categories {
+		userCategories = append(userCategories, UserCategory{
+			ID:   category.ID,
+			Name: category.Name,
+		})
+	}
+
+	c.JSON(http.StatusOK, userCategories)
 }
