@@ -56,6 +56,19 @@ func (service *UserService) CreateUser(c *gin.Context) {
 		return
 	}
 
+	// Create user initial categories
+	for _, categoryName := range utils.Categories {
+		category := models.Category{
+			Name:   categoryName,
+			UserID: user.ID,
+		}
+		result := service.db.Create(&category)
+		if result.Error != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": result.Error.Error()})
+			return
+		}
+	}
+
 	c.JSON(http.StatusCreated, user)
 	fmt.Println("Create User")
 }
@@ -107,5 +120,6 @@ func (service *UserService) Me(c *gin.Context) {
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 	}
+
 	c.JSON(http.StatusOK, userProfile)
 }

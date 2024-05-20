@@ -7,6 +7,6 @@ import (
 type Category struct {
 	gorm.Model
 	Name   string `json:"name" binding:"required"`
-	UserID int
+	UserID uint
 	User   User
 }
