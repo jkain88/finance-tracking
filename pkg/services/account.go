@@ -94,3 +94,27 @@ func (service *AccountService) UpdateAccount(c *gin.Context) {
 
 	c.JSON(http.StatusOK, account)
 }
+
+func (service *AccountService) DeleteAccount(c *gin.Context) {
+	userId := c.GetUint("userId")
+	accountId := c.Param("id")
+
+	var account models.Account
+	result := service.db.Where("id = ? AND user_id = ?", accountId, userId).Find(&account)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		return
+	}
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "No account found with the given ID"})
+		return
+	}
+
+	result = service.db.Delete(&account)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
+}
