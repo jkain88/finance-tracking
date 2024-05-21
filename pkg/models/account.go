@@ -10,6 +10,7 @@ const (
 	Savings  AccountType = "Savings"
 	Checking AccountType = "Checking"
 	Credit   AccountType = "Credit"
+	EWallet  AccountType = "E-Wallet"
 )
 
 func (t AccountType) IsValid() bool {
