@@ -13,7 +13,7 @@ func AccountRoutes(router *gin.RouterGroup, service *services.AccountService) {
 		authenticated.Use(middlewares.Authenticate)
 
 		authenticated.POST("/create", service.CreateAccount)
-		// authenticated.PUT("/:id", service.UpdateAccount)
+		authenticated.PUT("/:id", service.UpdateAccount)
 		// authenticated.DELETE("/:id", service.DeleteAccount)
 	}
 }

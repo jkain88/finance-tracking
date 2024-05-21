@@ -61,3 +61,36 @@ func (service *AccountService) CreateAccount(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, account)
 }
+
+func (service *AccountService) UpdateAccount(c *gin.Context) {
+	userId := c.GetUint("userId")
+	accountId := c.Param("id")
+
+	var account models.Account
+	result := service.db.Where("id = ? AND user_id = ?", accountId, userId).Find(&account)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		return
+	}
+
+	var accountInput AccountInput
+	err := c.ShouldBindJSON(&accountInput)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if !accountInput.Type.IsValid() {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid account type"})
+		return
+	}
+
+	account.Name = accountInput.Name
+	account.Type = accountInput.Type
+	result = service.db.Save(&account)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, account)
+}
