@@ -13,5 +13,6 @@ func CategoryRoutes(router *gin.RouterGroup, service *services.CategoryService) 
 		authenticated.Use(middlewares.Authenticate)
 
 		authenticated.POST("/create", service.CreateCategory)
+		authenticated.PUT("/:id", service.UpdateCategory)
 	}
 }
