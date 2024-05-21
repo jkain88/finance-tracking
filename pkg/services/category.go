@@ -84,3 +84,27 @@ func (service *CategoryService) UpdateCategory(c *gin.Context) {
 	service.db.Save(&category)
 	c.JSON(http.StatusOK, category)
 }
+
+func (service *CategoryService) DeleteCategory(c *gin.Context) {
+	userId := c.GetUint("userId")
+	categoryId := c.Param("id")
+
+	var category models.Category
+	result := service.db.Find(&category, categoryId)
+	if result.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": result.Error.Error()})
+		return
+	}
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Category not found"})
+		return
+	}
+
+	if category.UserID != userId {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "You cannot delete this category"})
+		return
+	}
+
+	service.db.Delete(&category)
+	c.JSON(http.StatusNoContent, nil)
+}
