@@ -12,6 +12,14 @@ const (
 	Credit   AccountType = "Credit"
 )
 
+func (t AccountType) IsValid() bool {
+	switch t {
+	case Savings, Checking, Credit:
+		return true
+	}
+	return false
+}
+
 type Account struct {
 	gorm.Model
 	Name        string      `json:"name"`
