@@ -33,6 +33,12 @@ type UserCategory struct {
 	Name string `json:"name"`
 }
 
+type UserAccount struct {
+	ID   uint               `json:"id"`
+	Name string             `json:"name"`
+	Type models.AccountType `json:"type"`
+}
+
 func NewUserService(db *gorm.DB) *UserService {
 	return &UserService{
 		db: db,
@@ -148,4 +154,26 @@ func (service *UserService) UserCategories(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, userCategories)
+}
+
+func (service *UserService) UserAccounts(c *gin.Context) {
+	var accounts []models.Account
+	var userAccounts []UserAccount
+	userId := c.GetUint("userId")
+
+	result := service.db.Where("user_id = ?", userId).Find(&accounts)
+	if result.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": result.Error.Error()})
+		return
+	}
+
+	for _, account := range accounts {
+		userAccounts = append(userAccounts, UserAccount{
+			ID:   account.ID,
+			Name: account.Name,
+			Type: account.Type,
+		})
+	}
+
+	c.JSON(http.StatusOK, userAccounts)
 }
