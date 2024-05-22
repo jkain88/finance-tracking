@@ -12,6 +12,6 @@ func TransactionRoutes(route *gin.RouterGroup, service *services.TransactionServ
 		authenticated := transactionGroup.Group("/")
 		authenticated.Use(middlewares.Authenticate)
 
-		authenticated.POST("/create")
+		authenticated.POST("/create", service.CreateTransaction)
 	}
 }
