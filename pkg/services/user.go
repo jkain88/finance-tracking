@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -188,15 +187,22 @@ func (service *UserService) UserAccounts(c *gin.Context) {
 func (service *UserService) UserTransactions(c *gin.Context) {
 	var transactions []models.Transaction
 	var userTransactions []UserTransaction
+	var pagination utils.PaginationResult
 	userId := c.GetUint("userId")
 
-	result := service.db.Order("id desc").Where("user_id = ?", userId).Preload("Category").Preload("Account").Find(&transactions)
+	db := service.db
+	db = db.Scopes(utils.Paginate(c, db, transactions, &pagination))
+	db = db.Order("id desc")
+	db = db.Where("user_id = ?", userId)
+	db = db.Preload("Category")
+	db = db.Preload("Account")
+
+	result := db.Find(&transactions)
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": result.Error.Error()})
 		return
 	}
 
-	fmt.Println(transactions)
 	for _, transaction := range transactions {
 		userTransactions = append(userTransactions, UserTransaction{
 			ID:   transaction.ID,
@@ -214,5 +220,7 @@ func (service *UserService) UserTransactions(c *gin.Context) {
 		})
 	}
 
-	c.JSON(http.StatusOK, userTransactions)
+	pagination.Rows = userTransactions
+
+	c.JSON(http.StatusOK, pagination)
 }
