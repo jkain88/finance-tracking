@@ -19,5 +19,6 @@ func Init() *gorm.DB {
 	db.AutoMigrate(&models.User{})
 	db.AutoMigrate(&models.Category{})
 	db.AutoMigrate(&models.Account{})
+	db.AutoMigrate(&models.Transaction{})
 	return db
 }

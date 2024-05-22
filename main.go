@@ -17,12 +17,14 @@ func main() {
 	userService := services.NewUserService(db)
 	categoryService := services.NewCategoryService(db)
 	accountService := services.NewAccountService(db)
+	transactionService := services.NewTransactionService(db)
 
 	v1 := router.Group("/api/v1")
 	{
 		routes.UserRoutes(v1, userService)
 		routes.CategoryRoutes(v1, categoryService)
 		routes.AccountRoutes(v1, accountService)
+		routes.TransactionRoutes(v1, transactionService)
 	}
 	fmt.Println("Hello")
 
