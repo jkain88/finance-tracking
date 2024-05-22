@@ -39,6 +39,14 @@ type UserAccount struct {
 	Type models.AccountType `json:"type"`
 }
 
+type UserTransaction struct {
+	ID       uint                   `json:"id"`
+	Name     string                 `json:"name"`
+	Type     models.TransactionType `json:"type"`
+	Account  UserAccount            `json:"account"`
+	Category UserCategory           `json:"category"`
+}
+
 func NewUserService(db *gorm.DB) *UserService {
 	return &UserService{
 		db: db,
@@ -81,7 +89,6 @@ func (service *UserService) CreateUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, user)
-	fmt.Println("Create User")
 }
 
 func (service *UserService) SignIn(c *gin.Context) {
@@ -176,4 +183,36 @@ func (service *UserService) UserAccounts(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, userAccounts)
+}
+
+func (service *UserService) UserTransactions(c *gin.Context) {
+	var transactions []models.Transaction
+	var userTransactions []UserTransaction
+	userId := c.GetUint("userId")
+
+	result := service.db.Order("id desc").Where("user_id = ?", userId).Preload("Category").Preload("Account").Find(&transactions)
+	if result.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": result.Error.Error()})
+		return
+	}
+
+	fmt.Println(transactions)
+	for _, transaction := range transactions {
+		userTransactions = append(userTransactions, UserTransaction{
+			ID:   transaction.ID,
+			Name: transaction.Name,
+			Category: UserCategory{
+				ID:   transaction.CategoryID,
+				Name: transaction.Category.Name,
+			},
+			Account: UserAccount{
+				ID:   transaction.AccountID,
+				Name: transaction.Account.Name,
+				Type: transaction.Account.Type,
+			},
+			Type: transaction.Type,
+		})
+	}
+
+	c.JSON(http.StatusOK, userTransactions)
 }

@@ -20,6 +20,7 @@ func UserRoutes(router *gin.RouterGroup, service *services.UserService) {
 			authenticated.GET("me", service.Me)
 			authenticated.GET("categories", service.UserCategories)
 			authenticated.GET("accounts", service.UserAccounts)
+			authenticated.GET("transactions", service.UserTransactions)
 		}
 	}
 	router.GET("/user", func(c *gin.Context) {
