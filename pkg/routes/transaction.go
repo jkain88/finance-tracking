@@ -13,5 +13,6 @@ func TransactionRoutes(route *gin.RouterGroup, service *services.TransactionServ
 		authenticated.Use(middlewares.Authenticate)
 
 		authenticated.POST("/create", service.CreateTransaction)
+		authenticated.PUT("/:id", service.UpdateTransaction)
 	}
 }

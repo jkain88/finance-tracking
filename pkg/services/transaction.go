@@ -2,7 +2,6 @@ package services
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -19,7 +18,7 @@ type TransactionInput struct {
 	CategoryID uint                   `json:"category_id" binding:"required"`
 	Name       string                 `json:"name" binding:"required"`
 	Amount     float64                `json:"amount" binding:"required"`
-	Type       models.TransactionType `json:"type" binding:"required"`
+	Type       models.TransactionType `json:"type"`
 }
 
 func NewTransactionService(db *gorm.DB) *TransactionService {
@@ -75,7 +74,6 @@ func (service *TransactionService) CreateTransaction(c *gin.Context) {
 	}
 
 	user, account, category, err := service.fetchRelatedData(userId, transactionInput.AccountID, transactionInput.CategoryID)
-	fmt.Println("ERR", err)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -97,6 +95,49 @@ func (service *TransactionService) CreateTransaction(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(userId, transactionInput)
 	c.JSON(http.StatusCreated, transaction)
+}
+
+func (service *TransactionService) UpdateTransaction(c *gin.Context) {
+	userId := c.GetUint("userId")
+	transactionId := c.Param("id")
+
+	var transactionInput TransactionInput
+	err := c.ShouldBindJSON(&transactionInput)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	_, account, category, err := service.fetchRelatedData(userId, transactionInput.AccountID, transactionInput.CategoryID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var transaction models.Transaction
+	result := service.db.Find(&transaction, transactionId)
+	if result.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": result.Error.Error()})
+		return
+	}
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "transaction not found"})
+		return
+	}
+
+	transaction.CategoryID = category.ID
+	transaction.Category = category
+	transaction.AccountID = account.ID
+	transaction.Account = account
+	transaction.Name = transactionInput.Name
+	transaction.Amount = transactionInput.Amount
+
+	result = service.db.Save(&transaction)
+	if result.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": result.Error.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, transaction)
 }
