@@ -14,5 +14,6 @@ func TransactionRoutes(route *gin.RouterGroup, service *services.TransactionServ
 
 		authenticated.POST("/create", service.CreateTransaction)
 		authenticated.PUT("/:id", service.UpdateTransaction)
+		authenticated.DELETE("/:id", service.DeleteTransaction)
 	}
 }

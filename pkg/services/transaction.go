@@ -126,6 +126,11 @@ func (service *TransactionService) UpdateTransaction(c *gin.Context) {
 		return
 	}
 
+	if transaction.UserID != userId {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "you are not allowed to update this transaction"})
+		return
+	}
+
 	transaction.CategoryID = category.ID
 	transaction.Category = category
 	transaction.AccountID = account.ID
@@ -140,4 +145,33 @@ func (service *TransactionService) UpdateTransaction(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, transaction)
+}
+
+func (service *TransactionService) DeleteTransaction(c *gin.Context) {
+	userId := c.GetUint("userId")
+	transactionId := c.Param("id")
+
+	var transaction models.Transaction
+	result := service.db.Find(&transaction, transactionId)
+	if result.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": result.Error.Error()})
+		return
+	}
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "transaction not found"})
+		return
+	}
+
+	if transaction.UserID != userId {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "you are not allowed to delete this transaction"})
+		return
+	}
+
+	result = service.db.Delete(&transaction)
+	if result.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": result.Error.Error()})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
 }
