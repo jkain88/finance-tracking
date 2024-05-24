@@ -13,7 +13,7 @@ func BudgetRoutes(router *gin.RouterGroup, service *services.BudgetService) {
 		authenticated.Use(middlewares.Authenticate)
 
 		authenticated.POST("/create", service.CreateBudget)
-		// authenticated.PUT("/:id", service.UpdateBudget)
+		authenticated.PUT("/:id", service.UpdateBudget)
 		// authenticated.DELETE("/:id", service.DeleteBudget)
 	}
 }

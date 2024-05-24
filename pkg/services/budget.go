@@ -48,3 +48,37 @@ func (service *BudgetService) CreateBudget(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, budget)
 }
+
+func (service *BudgetService) UpdateBudget(c *gin.Context) {
+	userId := c.GetUint("userId")
+	id := c.Param("id")
+
+	var budget models.Budget
+	result := service.db.Where("user_id = ?", userId).Find(&budget, id)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		return
+	}
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "budget not found"})
+		return
+	}
+
+	var budgetInput BudgetInput
+	err := c.ShouldBindJSON(&budgetInput)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	budget.CategoryID = budgetInput.CategoryID
+	budget.Label = budgetInput.Label
+	budget.Amount = budgetInput.Amount
+	result = service.db.Save(&budget)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, budget)
+}
