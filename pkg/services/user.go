@@ -46,6 +46,13 @@ type UserTransaction struct {
 	Category UserCategory           `json:"category"`
 }
 
+type UserBudget struct {
+	ID       uint         `json:"id"`
+	Category UserCategory `json:"category"`
+	Label    string       `json:"label"`
+	Amount   float64      `json:"amount"`
+}
+
 func NewUserService(db *gorm.DB) *UserService {
 	return &UserService{
 		db: db,
@@ -223,4 +230,30 @@ func (service *UserService) UserTransactions(c *gin.Context) {
 	pagination.Rows = userTransactions
 
 	c.JSON(http.StatusOK, pagination)
+}
+
+func (service *UserService) UserBudgets(c *gin.Context) {
+	var budgets []models.Budget
+	var userBudgets []UserBudget
+	userId := c.GetUint("userId")
+
+	result := service.db.Preload("Category").Where("user_id = ?", userId).Find(&budgets)
+	if result.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": result.Error.Error()})
+		return
+	}
+
+	for _, budget := range budgets {
+		userBudgets = append(userBudgets, UserBudget{
+			ID: budget.ID,
+			Category: UserCategory{
+				ID:   budget.CategoryID,
+				Name: budget.Category.Name,
+			},
+			Label:  budget.Label,
+			Amount: budget.Amount,
+		})
+	}
+
+	c.JSON(http.StatusOK, userBudgets)
 }
