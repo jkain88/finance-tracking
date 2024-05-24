@@ -14,6 +14,6 @@ func BudgetRoutes(router *gin.RouterGroup, service *services.BudgetService) {
 
 		authenticated.POST("/create", service.CreateBudget)
 		authenticated.PUT("/:id", service.UpdateBudget)
-		// authenticated.DELETE("/:id", service.DeleteBudget)
+		authenticated.DELETE("/:id", service.DeleteBudget)
 	}
 }

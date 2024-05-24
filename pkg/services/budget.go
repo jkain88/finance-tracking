@@ -82,3 +82,27 @@ func (service *BudgetService) UpdateBudget(c *gin.Context) {
 
 	c.JSON(http.StatusOK, budget)
 }
+
+func (service *BudgetService) DeleteBudget(c *gin.Context) {
+	userId := c.GetUint("userId")
+	id := c.Param("id")
+
+	var budget models.Budget
+	result := service.db.Where("user_id = ?", userId).Find(&budget, id)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		return
+	}
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "budget not found"})
+		return
+	}
+
+	result = service.db.Delete(&budget)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
+}
