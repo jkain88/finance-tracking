@@ -88,6 +88,7 @@ func (service *TransactionService) CreateTransaction(c *gin.Context) {
 		Account:    account,
 		Name:       transactionInput.Name,
 		Type:       transactionInput.Type,
+		Amount:     transactionInput.Amount,
 	}
 	result := service.db.Create(&transaction)
 	if result.Error != nil {
