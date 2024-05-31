@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -200,9 +201,20 @@ func (service *UserService) UserTransactions(c *gin.Context) {
 	db := service.db
 	db = db.Scopes(utils.Paginate(c, db, transactions, &pagination))
 	db = db.Order("id desc")
-	db = db.Where("user_id = ?", userId)
-	db = db.Preload("Category")
+	db = db.Where("transactions.user_id = ?", userId)
 	db = db.Preload("Account")
+
+	account := c.Query("account")
+	if account != "" {
+		db = db.Joins("JOIN accounts ON accounts.id = transactions.account_id").Where("accounts.name = ?", account)
+	}
+
+	category := c.Query("category")
+	if category != "" {
+		db = db.Joins("Category", service.db.Where(&models.Category{Name: category}))
+	} else {
+		db = db.Joins("Category")
+	}
 
 	result := db.Find(&transactions)
 	if result.Error != nil {
@@ -211,6 +223,7 @@ func (service *UserService) UserTransactions(c *gin.Context) {
 	}
 
 	for _, transaction := range transactions {
+		fmt.Println(transaction)
 		userTransactions = append(userTransactions, UserTransaction{
 			ID:   transaction.ID,
 			Name: transaction.Name,
