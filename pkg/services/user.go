@@ -40,11 +40,12 @@ type UserAccount struct {
 }
 
 type UserTransaction struct {
-	ID       uint                   `json:"id"`
-	Name     string                 `json:"name"`
-	Type     models.TransactionType `json:"type"`
-	Account  UserAccount            `json:"account"`
-	Category UserCategory           `json:"category"`
+	ID        uint                   `json:"id"`
+	CreatedAt time.Time              `json:"created_at"`
+	Name      string                 `json:"name"`
+	Type      models.TransactionType `json:"type"`
+	Account   UserAccount            `json:"account"`
+	Category  UserCategory           `json:"category"`
 }
 
 type UserBudget struct {
@@ -216,6 +217,28 @@ func (service *UserService) UserTransactions(c *gin.Context) {
 		db = db.Joins("Category")
 	}
 
+	startDate := c.Query("start_date")
+	if startDate != "" {
+		parseStartDate, err := time.Parse("2006-01-02", startDate)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid start_date format. Use YYYY-MM-DD"})
+			return
+		}
+		fmt.Println(startDate)
+		db = db.Where("transactions.created_at >= ?", parseStartDate)
+	}
+
+	endDate := c.Query("end_date")
+	if endDate != "" {
+		parsedEndDate, err := time.Parse("2006-01-02", endDate)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid endDate format. Use YYYY-MM-DD"})
+			return
+		}
+		parsedEndDate = parsedEndDate.Add(24 * time.Hour)
+		db = db.Where("transactions.created_at < ?", parsedEndDate)
+	}
+
 	result := db.Find(&transactions)
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": result.Error.Error()})
@@ -223,10 +246,10 @@ func (service *UserService) UserTransactions(c *gin.Context) {
 	}
 
 	for _, transaction := range transactions {
-		fmt.Println(transaction)
 		userTransactions = append(userTransactions, UserTransaction{
-			ID:   transaction.ID,
-			Name: transaction.Name,
+			ID:        transaction.ID,
+			Name:      transaction.Name,
+			CreatedAt: transaction.CreatedAt.UTC(),
 			Category: UserCategory{
 				ID:   transaction.CategoryID,
 				Name: transaction.Category.Name,
