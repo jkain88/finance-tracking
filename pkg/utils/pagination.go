@@ -23,7 +23,7 @@ type PaginationResult struct {
 func Paginate(c *gin.Context, db *gorm.DB, model interface{}, pagination *PaginationResult) func(db *gorm.DB) *gorm.DB {
 	var count int64
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 
 	db.Model(model).Count(&count)
 
