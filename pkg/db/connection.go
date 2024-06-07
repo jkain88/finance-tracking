@@ -2,6 +2,7 @@ package db
 
 import (
 	"log"
+	"os"
 	"time"
 
 	"github.com/jkain88/finance-tracking/pkg/models"
@@ -10,8 +11,7 @@ import (
 )
 
 func Init() *gorm.DB {
-	dbURL := "postgres://postgres:postgres@localhost:5432/finance-tracking?timezone=UTC"
-
+	dbURL := os.Getenv("DB_URL")
 	db, err := gorm.Open(postgres.Open(dbURL), &gorm.Config{
 		NowFunc: func() time.Time {
 			return time.Now().UTC()

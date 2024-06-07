@@ -1,0 +1,14 @@
+version: '3.8'
+name: finance-tracking
+services:
+  api:
+    container_name: api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - DB_URL=postgresql://postgres:yMpXSSkGwTNtIqzStUKhazWLjhZIeiiW@roundhouse.proxy.rlwy.net:51963/railway
+    ports:
+      - 8000:8000
+    volumes:
+      - ./:/app
