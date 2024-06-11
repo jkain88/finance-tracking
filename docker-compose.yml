@@ -7,8 +7,8 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      - DB_URL=postgresql://postgres:pWlWNBMMKqULMKdSegJlnHZiphBaFEti@monorail.proxy.rlwy.net:14559/railway
+      - DB_URL=postgresql://postgres:qEymZTkCXtNDAGGRTwfbLjsJTMPtPwrR@viaduct.proxy.rlwy.net:24244/railway
     ports:
-      - 8000:8000
+      - 8080:8080
     volumes:
       - ./:/app
