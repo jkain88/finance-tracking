@@ -1,18 +1,23 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jkain88/finance-tracking/pkg/db"
 	"github.com/jkain88/finance-tracking/pkg/routes"
 	"github.com/jkain88/finance-tracking/pkg/services"
+	"github.com/markbates/goth"
+	"github.com/markbates/goth/providers/google"
 )
 
 func main() {
 	db := db.Init()
 	router := gin.Default()
+
+	goth.UseProviders(
+		google.New(os.Getenv("GOOGLE_KEY"), os.Getenv("GOOGLE_SECRET"), "http://localhost:8080/auth/google/callback"),
+	)
 
 	// Initialize services with db connection
 	userService := services.NewUserService(db)
@@ -28,8 +33,8 @@ func main() {
 		routes.AccountRoutes(v1, accountService)
 		routes.TransactionRoutes(v1, transactionService)
 		routes.BudgetRoutes(v1, budgetService)
+		routes.AuthRoutes(v1)
 	}
-	fmt.Println("Hello")
 
 	port := os.Getenv("PORT")
 	if port == "" {
