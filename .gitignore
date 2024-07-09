@@ -22,3 +22,5 @@ go.work.sum
 
 # Built from docker
 api
+
+.env
