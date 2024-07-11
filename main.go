@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -16,9 +17,8 @@ func main() {
 	router := gin.Default()
 
 	goth.UseProviders(
-		google.New(os.Getenv("GOOGLE_KEY"), os.Getenv("GOOGLE_SECRET"), "http://localhost:8080/auth/google/callback"),
+		google.New(os.Getenv("GOOGLE_KEY"), os.Getenv("GOOGLE_SECRET"), fmt.Sprintf("%s/api/v1/auth/google/callback", os.Getenv("API_URL"))),
 	)
-
 	// Initialize services with db connection
 	userService := services.NewUserService(db)
 	categoryService := services.NewCategoryService(db)
