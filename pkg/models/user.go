@@ -8,4 +8,5 @@ type User struct {
 	LastName  string `json:"last_name" binding:"required"`
 	Email     string `json:"email" binding:"required" gorm:"unique"`
 	Password  string `json:"password"`
+	Provider  string `json:"provider"`
 }

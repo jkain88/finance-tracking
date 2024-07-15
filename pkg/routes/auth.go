@@ -28,9 +28,17 @@ func AuthRoutes(router *gin.RouterGroup, userService *services.UserService) {
 
 		userExists, err := userService.IsUserExists(user.Email)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("ERROR", err)
 			c.JSON(200, gin.H{"error": err})
 			return
+		}
+		if !userExists {
+			err = userService.CreateUser(user.Email, c.Param("provider"))
+			if err != nil {
+				fmt.Println("ERROR", err)
+				c.JSON(200, gin.H{"error": err})
+				return
+			}
 		}
 		fmt.Println("RESULT", userExists)
 		c.JSON(200, gin.H{"user": user})

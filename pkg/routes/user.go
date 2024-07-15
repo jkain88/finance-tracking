@@ -11,7 +11,6 @@ import (
 func UserRoutes(router *gin.RouterGroup, service *services.UserService) {
 	userGroup := router.Group("/user")
 	{
-		userGroup.POST("/signup", service.CreateUser)
 		userGroup.POST("/signin", service.SignIn)
 
 		authenticated := userGroup.Group("/")

@@ -72,26 +72,12 @@ func (service *UserService) IsUserExists(email string) (bool, error) {
 	return result.RowsAffected != 0, nil
 }
 
-func (service *UserService) CreateUser(c *gin.Context) {
-	var user models.User
+func (service *UserService) CreateUser(email string, provider string) error {
+	user := models.User{Email: email, Provider: provider}
 
-	err := c.ShouldBindJSON(&user)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	hashedPassword, err := utils.HashPassword(user.Password)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	user.Password = hashedPassword
 	result := service.db.Create(&user)
 	if result.Error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": result.Error.Error()})
-		return
+		return errors.New(result.Error.Error())
 	}
 
 	// Create user initial categories
@@ -102,12 +88,10 @@ func (service *UserService) CreateUser(c *gin.Context) {
 		}
 		result := service.db.Create(&category)
 		if result.Error != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": result.Error.Error()})
-			return
+			return errors.New(result.Error.Error())
 		}
 	}
-
-	c.JSON(http.StatusCreated, user)
+	return nil
 }
 
 func (service *UserService) SignIn(c *gin.Context) {
