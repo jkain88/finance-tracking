@@ -1,11 +1,14 @@
 package routes
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
+	"github.com/jkain88/finance-tracking/pkg/services"
 	"github.com/markbates/goth/gothic"
 )
 
-func AuthRoutes(router *gin.RouterGroup) {
+func AuthRoutes(router *gin.RouterGroup, userService *services.UserService) {
 	router.GET("/auth/:provider", func(c *gin.Context) {
 		q := c.Request.URL.Query()
 		q.Add("provider", c.Param("provider"))
@@ -22,6 +25,14 @@ func AuthRoutes(router *gin.RouterGroup) {
 			c.JSON(500, gin.H{"error": err})
 			return
 		}
+
+		userExists, err := userService.IsUserExists(user.Email)
+		if err != nil {
+			fmt.Println(err)
+			c.JSON(200, gin.H{"error": err})
+			return
+		}
+		fmt.Println("RESULT", userExists)
 		c.JSON(200, gin.H{"user": user})
 	})
 }

@@ -33,7 +33,7 @@ func main() {
 		routes.AccountRoutes(v1, accountService)
 		routes.TransactionRoutes(v1, transactionService)
 		routes.BudgetRoutes(v1, budgetService)
-		routes.AuthRoutes(v1)
+		routes.AuthRoutes(v1, userService)
 	}
 
 	port := os.Getenv("PORT")

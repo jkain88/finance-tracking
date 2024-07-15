@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -59,6 +60,16 @@ func NewUserService(db *gorm.DB) *UserService {
 	return &UserService{
 		db: db,
 	}
+}
+
+func (service *UserService) IsUserExists(email string) (bool, error) {
+	var user models.User
+	result := service.db.Where("email = ?", email).Find(&user)
+	if result.Error != nil {
+		return false, errors.New("user not found")
+	}
+
+	return result.RowsAffected != 0, nil
 }
 
 func (service *UserService) CreateUser(c *gin.Context) {
