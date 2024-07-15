@@ -80,6 +80,7 @@ func (service *UserService) CreateUser(email string, provider string) error {
 		return errors.New(result.Error.Error())
 	}
 
+	// TODO: SHOULD BE BACKGROUND TASK
 	// Create user initial categories
 	for _, categoryName := range utils.Categories {
 		category := models.Category{
