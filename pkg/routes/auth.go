@@ -4,7 +4,9 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jkain88/finance-tracking/pkg/models"
 	"github.com/jkain88/finance-tracking/pkg/services"
+	"github.com/jkain88/finance-tracking/pkg/utils"
 	"github.com/markbates/goth/gothic"
 )
 
@@ -26,6 +28,7 @@ func AuthRoutes(router *gin.RouterGroup, userService *services.UserService) {
 			return
 		}
 
+		var userObject *models.User
 		userExists, err := userService.IsUserExists(user.Email)
 		if err != nil {
 			fmt.Println("ERROR", err)
@@ -33,14 +36,28 @@ func AuthRoutes(router *gin.RouterGroup, userService *services.UserService) {
 			return
 		}
 		if !userExists {
-			err = userService.CreateUser(user.Email, c.Param("provider"))
+			userObject, err = userService.CreateUser(user.Email, c.Param("provider"))
+			if err != nil {
+				fmt.Println("ERROR", err)
+				c.JSON(200, gin.H{"error": err})
+				return
+			}
+		} else {
+			userObject, err = userService.GetUserByEmail(user.Email)
 			if err != nil {
 				fmt.Println("ERROR", err)
 				c.JSON(200, gin.H{"error": err})
 				return
 			}
 		}
-		fmt.Println("RESULT", userExists)
-		c.JSON(200, gin.H{"user": user})
+
+		fmt.Println(userObject.Email, userObject.CreatedAt)
+		token, err := utils.GenerateJWT(*userObject)
+		if err != nil {
+			fmt.Println("ERROR", err)
+			c.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(200, gin.H{"token": token})
 	})
 }

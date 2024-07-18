@@ -72,12 +72,21 @@ func (service *UserService) IsUserExists(email string) (bool, error) {
 	return result.RowsAffected != 0, nil
 }
 
-func (service *UserService) CreateUser(email string, provider string) error {
+func (service *UserService) GetUserByEmail(email string) (*models.User, error) {
+	var user models.User
+	result := service.db.Where("email = ?", email).Find(&user)
+	if result.Error != nil {
+		return nil, errors.New("user not found")
+	}
+	return &user, nil
+}
+
+func (service *UserService) CreateUser(email string, provider string) (*models.User, error) {
 	user := models.User{Email: email, Provider: provider}
 
 	result := service.db.Create(&user)
 	if result.Error != nil {
-		return errors.New(result.Error.Error())
+		return nil, errors.New(result.Error.Error())
 	}
 
 	// TODO: SHOULD BE BACKGROUND TASK
@@ -89,10 +98,10 @@ func (service *UserService) CreateUser(email string, provider string) error {
 		}
 		result := service.db.Create(&category)
 		if result.Error != nil {
-			return errors.New(result.Error.Error())
+			return nil, errors.New(result.Error.Error())
 		}
 	}
-	return nil
+	return &user, nil
 }
 
 func (service *UserService) SignIn(c *gin.Context) {
