@@ -22,14 +22,14 @@ func AuthRoutes(router *gin.RouterGroup, userService *services.UserService) {
 		c.Request.URL.RawQuery = q.Encode()
 		user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
 		if err != nil {
-			c.JSON(500, gin.H{"error": err})
+			c.JSON(500, gin.H{"error": err.Error()})
 			return
 		}
 
 		userExists, err := userService.IsUserExists(user.Email)
 		if err != nil {
 			fmt.Println("ERROR", err)
-			c.JSON(200, gin.H{"error": err})
+			c.JSON(500, gin.H{"error": err.Error()})
 			return
 		}
 		if !userExists {
