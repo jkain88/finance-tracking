@@ -2,6 +2,7 @@ package routes
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jkain88/finance-tracking/pkg/models"
@@ -24,7 +25,7 @@ func AuthRoutes(router *gin.RouterGroup, userService *services.UserService) {
 		c.Request.URL.RawQuery = q.Encode()
 		user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
 		if err != nil {
-			c.JSON(500, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
@@ -32,21 +33,21 @@ func AuthRoutes(router *gin.RouterGroup, userService *services.UserService) {
 		userExists, err := userService.IsUserExists(user.Email)
 		if err != nil {
 			fmt.Println("ERROR", err)
-			c.JSON(500, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 		if !userExists {
 			userObject, err = userService.CreateUser(user.Email, c.Param("provider"))
 			if err != nil {
 				fmt.Println("ERROR", err)
-				c.JSON(200, gin.H{"error": err})
+				c.JSON(http.StatusOK, gin.H{"error": err})
 				return
 			}
 		} else {
 			userObject, err = userService.GetUserByEmail(user.Email)
 			if err != nil {
 				fmt.Println("ERROR", err)
-				c.JSON(200, gin.H{"error": err})
+				c.JSON(http.StatusOK, gin.H{"error": err})
 				return
 			}
 		}
@@ -55,9 +56,9 @@ func AuthRoutes(router *gin.RouterGroup, userService *services.UserService) {
 		token, err := utils.GenerateJWT(*userObject)
 		if err != nil {
 			fmt.Println("ERROR", err)
-			c.JSON(500, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(200, gin.H{"token": token})
+		c.Redirect(http.StatusFound, fmt.Sprintf("finance-tracking-mobile://auth?token=%s", token))
 	})
 }
