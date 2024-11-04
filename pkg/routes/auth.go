@@ -3,6 +3,7 @@ package routes
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jkain88/finance-tracking/pkg/models"
@@ -59,6 +60,6 @@ func AuthRoutes(router *gin.RouterGroup, userService *services.UserService) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		c.Redirect(http.StatusFound, fmt.Sprintf("finance-tracking-mobile://auth?token=%s", token))
+		c.Redirect(http.StatusFound, fmt.Sprintf("%s?token=%s", os.Getenv("FRONTEND_URL"), token))
 	})
 }
