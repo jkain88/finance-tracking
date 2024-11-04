@@ -7,11 +7,11 @@ import (
 
 	"github.com/jkain88/finance-tracking/pkg/db"
 	"github.com/jkain88/finance-tracking/pkg/models"
-	"gorm.io/gorm"
 )
 
-func populateTransactions(db *gorm.DB) {
+func PopulateTransactions() {
 	//Define a list of transactions
+	db := db.Init()
 	transactions := []models.Transaction{
 		{
 			AccountID:  1,
@@ -73,11 +73,4 @@ func populateTransactions(db *gorm.DB) {
 		transaction.CreatedAt = time.Now().AddDate(0, 0, rand.Intn(3))
 		db.Save(&transaction)
 	}
-}
-
-func main() {
-	db := db.Init()
-
-	// Populate transactions
-	populateTransactions(db)
 }
